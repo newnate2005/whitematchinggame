@@ -1,0 +1,466 @@
+<!-- Nathaniel White's Matching Game Version 1.0 -->
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Nathaniel White's Matching Game</title>
+		
+		<style>
+			body
+			{
+				background-color: #253cc2;
+			}
+			
+			h1
+			{
+				text-align: center;
+				color: #253cc2;
+				font-family: Verdana;
+			}
+
+			#main
+			{
+				width: 100%;
+				max-width: 800px; 
+				min-width: 500px;
+				
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: auto;
+				margin-bottom: auto;
+				
+				border: 1px solid #cf7317;
+				background-color: black;
+			}
+			
+			#gameboard
+			{
+				width: 90%;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: auto;
+				margin-bottom: auto;
+			}
+			
+			button
+			{
+				background-color: #cf7317;
+				border-radius: 24px;
+				color: #253cc2;
+				width: 24%;
+				border: 2px solid #253cc2;
+				font-family: Verdana;
+				margin-bottom: 2%;
+				margin-top: 2%;
+				
+			}
+			
+			button:hover
+			{
+				border: 2px dotted #cf7317; 
+				background-color: #253cc2;
+				color: orange;
+			}
+			
+			img
+			{
+				width: 23%;
+				margin: 0px;
+				margin-top: -2px;
+				margin-bottom: -2px;
+			}
+			
+			img:hover
+			{
+				opacity: .5;
+				
+			}
+		</style>
+	</head>
+	
+	<body onload="setupBoard()">
+		<div id="main" style="margin: 0 auto; width: auto; text-align: center;">
+		
+			<h1 id="title">Flip 2 to Match 2!</h1>
+				
+			<!--<button type="button" onclick="checkMatch()"      >Check for Match </button>-->
+			<button type="button" onclick="getScore()"        >Check the Score </button>
+			<button type="button" onclick="getTurnData()"     >Check Turn Data </button>
+			<button type="button" onclick="location.reload()" >Reset Game Board</button>
+			
+			<br />
+			
+			<div id="gameboard">
+				<!-- set up default images of cards, common back -->
+				<img id="0" onclick="play(0);" src="images/cardback_01.png" /><img id="1" onclick="play(1);" src="images/cardback_02.png" /><img id="2" onclick="play(2);" src="images/cardback_03.png" /><img id="3" onclick="play(3);" src="images/cardback_04.png" /><img id="4" onclick="play(4);" src="images/cardback_05.png" /><img id="5" onclick="play(5);" src="images/cardback_06.png" /><img id="6" onclick="play(6);" src="images/cardback_07.png" /><img id="7" onclick="play(7);" src="images/cardback_08.png" /><img id="8" onclick="play(8);" src="images/cardback_09.png" /><img id="9" onclick="play(9);" src="images/cardback_10.png" /><img id="10" onclick="play(10);" src="images/cardback_11.png" /><img id="11" onclick="play(11);" src="images/cardback_12.png" /><img id="12" onclick="play(12);" src="images/cardback_13.png" /><img id="13" onclick="play(13);" src="images/cardback_14.png" /><img id="14" onclick="play(14);" src="images/cardback_15.png" /><img id="15" onclick="play(15);" src="images/cardback_16.png" />
+			</div>
+			
+			<button type="button" class="long" onclick="playMusic()">Play Music</button>
+			<button type="button" class="long" onclick="pauseMusic()">Pause Music</button>
+		</div>
+		
+		<script>
+			// track gameplay
+			var turn = 1; // tracks which turn it is in the game
+			var plays = 0; // tracks which play it is in each turn
+			var gameover = false;
+
+			// keep score for each player
+			var player1matches = 0;
+			var player2matches = 0;
+
+			// arrays to hold data for each play, reset on next turn
+			let originalSource = Array(2);	
+			let spaces = Array(2);
+			let choice = Array(2);
+			let cards = Array(16);
+			
+			// track which cards have been flipped and matched
+			let flipped = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0];
+
+			// media files
+			var audioBackground = new Audio( "sounds/Music-Desert.wav" );
+			
+			// string array containing the source file for all images
+			// fixed not randomized
+			let setup = Array(16);
+
+			setup[0] = 'images/dragon1.png';
+			setup[1] = 'images/dragon1.png';
+			setup[2] = 'images/dragon2.png';
+			setup[3] = 'images/dragon2.png';
+
+			setup[4] = 'images/dragon3.png';
+			setup[5] = 'images/dragon3.png';
+			setup[6] = 'images/dragon4.png';
+			setup[7] = 'images/dragon4.png';
+
+			setup[8] = 'images/dragon5.png';
+			setup[9] = 'images/dragon5.png';
+			setup[10] = 'images/dragon6.png';
+			setup[11] = 'images/dragon6.png';
+
+			setup[12] = 'images/dragon7.png';
+			setup[13] = 'images/dragon7.png';
+			setup[14] = 'images/dragon8.png';
+			setup[15] = 'images/dragon8.png';
+
+			// set up all of the functions
+			function playMusic()
+			{
+				// user can play music
+				audioBackground.play();
+ 				audioBackground.loop = true;
+			}
+
+ 			function pauseMusic()
+ 			{
+ 				// user can pause/stop music on demand
+ 				audioBackground.pause();
+ 			}
+
+            function showCards()
+			{
+				//alert("showCards()");
+				alert("ShowCards()\n" + cards[0] + ", " + cards[1] + ", " + cards[2] + ", " + cards[3] + "\n" + cards[4] + ", " + cards[5] + ", " + cards[6] + ", " + cards[7] + "\n" + cards[8] + ", " + cards[9] + ", " + cards[10] + ", " + cards[11] + "\n" + cards[12] + ", " + cards[13] + ", " + cards[14] + ", " + cards[15]);
+            }
+
+			function setupBoard()
+			{
+				var random;
+				
+				for( i = 0; i < 16; i++ )
+				{
+					// generate a random number 0-15
+					random = Math.floor( Math.random() * 16 );
+
+					// if cards play array is empty at this random index
+					if( cards[ random ] == null )
+					{
+						cards[ random ] = setup[ i ];
+					}
+					else
+					{
+						// cancel the incrementation of loop
+						if (i > 0) { i--; }
+					}
+				}
+			} // end function setupBoard()
+
+			function flipCard( space )
+			{
+				document.getElementById( space ).src = cards[ space ];
+
+				// whoosh for flipped
+				var audioFlip = new Audio( "sounds/Item_1.x-wav" );
+				audioFlip.play();
+
+				// record the state of flip
+				flipped[ space ] = 1;
+			} // end function flipCard()
+			
+			function play( space )
+			{
+				// alert in case both plays have already been made
+				if( plays == 2 )
+				{
+					alert( "Please click the Check Match button!" );
+				}
+
+				// check to see if this space has not been played
+				else if( flipped[ space ] == 0 ) // Here lies the place where I closed parentheses with a semicolon. It managed to break my entire program. Credit for its finding belongs to fellow coder Antonio Franco.
+				{
+					// determine the play for saving info to turn array elements
+					if( plays == 0 )
+					{
+						spaces[0] = space;
+						
+						originalSource[0] = document.getElementById( space ).src;
+						
+						choice[0] = cards[ space ];
+
+						plays++;
+
+						// flip the card
+						flipCard( space );
+					}
+					else
+					{
+						spaces[1] = space; 
+
+						originalSource[1] = document.getElementById( space ).src;
+
+						choice[1] = cards[ space ];
+
+						plays++;
+
+						flipCard( space );
+						
+						setTimeout( function () { checkMatch() }, 0.5*1000); // wait .5 seconds
+					}
+				}
+
+				// error message for a card that has already been selected or matched
+				else
+				{
+					alert( "This space has been played! Try another card!" );
+
+					// buzz for try again
+					var audioError = new Audio( "sounds/Item_107.x-wav" );
+					audioError.play();
+				}
+			} // end function play()
+			
+			function checkMatch()
+			{
+				// check if game is over, alert user 
+				if( gameover )
+				{
+					alert( "This game has ended!" );
+					return 0;
+				}
+				
+				// check to see if user selected 2 cards 
+				if( plays != 2 )
+				{
+					alert( "You must select 2 cards before checking for a match!" );
+				}
+				else // check match
+				{
+					if( choice[0] == choice[1] ) // choices match
+					{
+						// messages for player 1
+						if( turn % 2 == 1 )
+						{
+							// increment 
+							player1matches++;
+							
+							// check to see if this is the 8th match
+							if( (player1matches + player2matches) == 8 )
+							{
+								alert( "You have a match, Player 1! No more matches, Game Over!" );
+							}
+							// if not 8th, then next turn 
+							else 
+							{
+								alert( "You have a match, Player 1! Player 2, now it's your turn!" );
+								document.getElementById( "title" ).innerHTML = "Player 2's Turn!";
+							}
+						}
+						// messages for player 2
+						else
+						{
+							// increment 
+							player2matches++;
+							
+							// check to see if this is the 8th match
+							if( (player1matches + player2matches) == 8 )
+							{
+								alert( "You have a match, Player 2! No more matches, Game Over!" );
+							}
+							// if not 8th, then next turn 
+							else 
+							{
+								alert( "You have a match, Player 2! Player 1, now it's your turn!" );
+								document.getElementById( "title" ).innerHTML = "Player 1's Turn!";
+							}
+						}
+						
+						// play happy horn sound 
+						var audioMatch = new Audio( "sounds/Item_134.x-wav" );
+						audioMatch.play();
+						
+						// flipping matched cards to player 1 or player 2 indicator cards
+						if( turn % 2 == 1 )
+						{
+							document.getElementById( spaces[0] ).src = 'images/player1match.png';
+							document.getElementById( spaces[1] ).src = 'images/player1match.png';
+						}
+						else
+						{
+							document.getElementById( spaces[0] ).src = 'images/player2match.png';
+							document.getElementById( spaces[1] ).src = 'images/player2match.png';
+						}
+						
+						// update or reset gameplay variables
+						turn++;
+						plays = 0;
+						
+						checkEnd();
+					
+					}
+					else // choices don't match
+					{
+						if( turn % 2 == 1 )
+						{
+							alert( "No match this time, Player 1. Player 2, now it's your turn!" );
+							document.getElementById( "title" ).innerHTML = "Player 2's Turn!";
+						}
+						else
+						{
+							alert( "No match this time, Player 2. Player 1, now it's your turn!" );
+							document.getElementById( "title" ).innerHTML = "Player 1's Turn!";
+						}
+						
+						// buzz for no match sound 
+						var audioError = new Audio( "sounds/Item_107.x-wav" );
+						audioError.play();
+						
+						// update or reset gameplay variables
+						turn++;
+						plays = 0;
+						
+						// turn non-matched cards back over
+						document.getElementById( spaces[0] ).src = originalSource[0];
+						document.getElementById( spaces[1] ).src = originalSource[1];
+						
+						// reset the flipped values
+						flipped[ spaces[0] ] = 0;
+						flipped[ spaces[1] ] = 0;
+					}
+					
+				}
+			} // end function checkMatch()
+			
+			function checkEnd()
+			{
+			    var sum = 0;
+			    
+			    for( i = 0; i < 16; i++ )
+			    {
+			        sum = sum + flipped[i];
+			    }
+			    
+			    if( sum == 16 )
+			    {
+			        gameover = true;
+			        
+			        var audioWinner = new Audio( "sounds/Achievement_complete.x-wav" );
+			        audioWinner.play();
+			        
+			        // display number of turns to win game 
+			        alert( "Game Over in " + turn + " turns!" );
+			        
+			        // display the winner 
+			        if( player1matches > player2matches )
+			        {
+			            document.getElementById( "title" ).innerHTML = "Player 1 wins!";
+			        }
+			        else if( player1matches < player2matches )
+			        {
+			            document.getElementById( "title" ).innerHTML = "Player 2 wins!";
+			        }
+			        else
+			        {
+			            document.getElementById( "title" ).innerHTML = "We have a tie!";
+			        }
+			    }
+			}
+			
+			function getScore()
+			{
+			    if( player1matches == 1 && ( player2matches > 1 || player2matches < 1 ) )
+			    {
+			        alert( "Player 1: " + player1matches + " match --- Player 2: " + player2matches + " matches" );
+			    }
+			    else if( player1matches == 1 && player2matches == 1 )
+			    {
+			        alert( "Player 1: " + player1matches + " match --- Player 2: " + player2matches + " match" );
+			    }
+			    else if( player2matches == 1 && ( player1matches > 1 || player1matches < 1 ) )
+			    {
+			        alert( "Player 1: " + player1matches + " matches --- Player 2: " + player2matches + " match" );
+			    }
+			    else
+			    {
+			        alert( "Player 1: " + player1matches + " matches --- Player 2: " + player2matches + " matches" );
+			    }
+			}
+			
+			function getTurnData()
+			{
+			    if( gameover )
+			    {
+			         alert( "This game has ended!" );
+			         return 0;
+			    }
+			    
+			    // display messages based on whose turn it is 
+			    if( turn % 2 == 1 )
+			    {
+			        if( plays == 0 || plays == 1 )
+			        {
+			            alert( "We are on turn # " + turn + ", play # " + (plays+1) + ". Pick a card, Player 1!" );
+			        }
+			        else
+			        {
+			            alert( "We are on turn # " + turn + ", play # " + (plays+1) + ". Check for a match, Player 1!" );
+			        }
+			    }
+			    else
+			    {
+			        if( plays == 0 || plays == 1 )
+			        {
+			            alert( "We are on turn # " + turn + ", play # " + (plays+1) + ". Pick a card, Player 2!" );
+			        }
+			        else
+			        {
+			            alert( "We are on turn # " + turn + ", play # " + (plays+1) + ". Check for a match, Player 2!" );
+			        }
+			    }
+			}
+			
+			
+		
+		</script>
+	</body>
+</html>                                                                                                                                                                                                                                     
+
+
+
+
+
+
+
+
