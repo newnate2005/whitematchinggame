@@ -8,9 +8,15 @@ It is a bit jarring at first, especially if the volume is turned up and you are 
 
 
 Credits:
+
 Images - The Internet
+
 Sounds - Terraria
+
 Music - Terraria
+
 Automatic checkMatch() - Antonio
+
 Code - Me
+
 the whole project and lessons and more - Mrs. Carr
